@@ -46,48 +46,35 @@ bool sort_nsga_fitness(NSGA_mem const &x, NSGA_mem const &y)
     return x.final_fitness < y.final_fitness;
 }
 
-//bool SortByDim(NSGA_mem* left, NSGA_mem* right, int dim) {
-//        int al = left->coordinates.at(dim), ar = right->coordinates.at(dim);
-//        return (al < ar);
-//}
-
 class NSGA_2 {
-private:
-    public:
-    vector<NSGA_mem> population;
-    int NSGA_dimension;
-    void find_tier();
-    void find_proximity(vector<NSGA_mem>* pM);
-    void find_proxy();
-    void calc_fitness();
-
-    void interpret();
-    //int lib_NSGA_index;
-
-
-    //void find_();
-
+public:
+/// VITALS
+    bool first_dominates_second(vector<double> a, vector<double> b);
+    void declare_NSGA_dimension(int);
+    
+/// INPUTS
     void vector_input(vector<double>, int);
     void two_dim_input(double, double, int);
     void three_dim_input(double, double, double, int);
     
-    void NSGA_reset();
-    void size_check();
+/// FITNESS CALCULATION  
+    vector<NSGA_mem> population;
+    int NSGA_dimension;
     void execute();
+    void find_tier();
+    void find_proximity(vector<NSGA_mem>* pM);
+    void calc_fitness();
+
+/// ACCESSIBILITY
+    void console_interpretation();
+    void size_check(); /// empty
+    void show_tiers();
+    
+/// INTERFACE
+    void NSGA_reset();
     void get_NSGA_fitness(vector<double>*);
     double NSGA_member_fitness(int);
-    void look();
-    void declare_NSGA_dimension(int);
-
-    void show_tiers();
-    int should_execute();
-    bool first_dominates_second(vector<double> a, vector<double> b);
 };
-
-int NSGA_2::should_execute()
-{
-
-}
 
 void NSGA_2::declare_NSGA_dimension(int a)
 {
@@ -200,7 +187,7 @@ void NSGA_2::find_proximity(vector<NSGA_mem>* pM) { /// Jan 2014 redux of find_p
     }
 }
 
-void NSGA_2::interpret()
+void NSGA_2::console_interpretation()
 {
     if(NSGA_DEBUG){cout << "NSGA::interpret in " << endl;}
     for(int i=0; i<population.size(); i++){
@@ -285,8 +272,6 @@ void NSGA_2::size_check() {
 
 }
 
-
-
 void NSGA_2::execute() {
     if(NSGA_DEBUG){cout << "NSGA::EXECUTE in " << endl;}
     //size_check();
@@ -323,51 +308,5 @@ void NSGA_2::show_tiers()
  * vector<double>* pFit=&fitnesses;
  * NSGA.get_NSGA_fitness(pFit);
  */
-
-/*
-int main(int argc, char** argv) {
-    cout << "START" << endl;
-    srand(time(NULL));
-    NSGA_2 NSGA;
-    NSGA.declare_NSGA_dimension(2);
-    NSGA.NSGA_reset();
-    int a, b;
-    for (int i = 0; i < 200; i++) {
-        a = rand() % 1000;
-        b = rand() % 1000;
-        NSGA.two_dim_input(a, b);
-    }
-
-    NSGA.execute();
-    //NSGA.find_tier();
-    //NSGA.find_proximity();
-    //NSGA.interpret();
-    //cout << endl;
-    //cout << endl;
-    //cout << endl;
-    //NSGA.show_tiers();
-    //NSGA.execute();
-    //NSGA.look();
-
-
-    int jj=0;
-    for(int oo=0; oo<10000000; oo++)
-    {
-        jj++;
-    }
-
-    cout << "starting to show fitnesses: " << endl;
-//    for(int tt=0; tt<NSGA.aggregate_fitness.size(); tt++)
-    {
-//        cout << NSGA.points.at(tt).at(0) << "\t" << NSGA.points.at(tt).at(1) << "\t" << NSGA.aggregate_fitness.at(tt) << endl;
-    }
-
-    cout << "pdbq" << endl;
-    return 0;
-}
-
-*/
-
-
 
 #endif // NSGAHEADER_H_INCLUDED

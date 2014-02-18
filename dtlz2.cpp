@@ -113,6 +113,7 @@ public:
 };
 
 bool DTLZ2class::validity_check(vector<double> soln){
+    /// unused 2/18/14
     for(int i=0; i<soln.size(); i++){
         if(soln.at(i) < 0){
             return false;
@@ -128,21 +129,8 @@ bool DTLZ2class::validity_check(vector<double> soln){
 void DTLZ2class::eval(vector<double> soln, vector<double> xM){
     /// soln size OBJECTIVES - 1
     /// xM size dependent on difficulty
-    function_vals.clear();
     
-//    soln.clear();
-//    xM.clear();
-//    soln.push_back(0.5);
-//    soln.push_back(0.5);
-//    soln.push_back(0.5);
-//    xM.push_back(0.5);
-//    xM.push_back(0.5);
-//    xM.push_back(0.5);
-//    xM.push_back(0.5);
-//    xM.push_back(0.5);
-//    xM.push_back(0.5);
-//    xM.push_back(0.5);
-//    xM.push_back(0.5);
+    function_vals.clear();
     
     /// TODO GENERALIZE;
     double g = g_eval(xM);
@@ -168,15 +156,11 @@ double DTLZ2class::g_eval(vector<double> xM){
     double g=0,summat=0;
     for(int i=0; i<xM.size(); i++){
         double xi = xM.at(i);
-        //cout << "Xi: " << xi << endl;
         double t1 = pow(xi - 0.5,2);
         double t2 = 0;
-        //DTLZ2//double t2 = cos(20*PI*(xi - 0.5));
         summat += t1-t2;
     }
     g=summat;
-    //DTLZ2///g = 100 * ( xM.size() + summat);
-    //cout << "g = " << g << endl;
     return g;
 }
 
@@ -190,16 +174,13 @@ int main(){ /// DTLZ2
     FILE* pFILE_f1;
     FILE* pFILE_f2;
     FILE* pFILE_f3;
-    FILE* pFILE_treasure;
     FILE* pFILE_pareto_number;
-    FILE* pFILE_pareto_discovery;
     FILE* pFILE_pareto_front;
     pFILE_fit=fopen("fitness.txt","w");
     pFILE_f1=fopen("f1.txt","w");
     pFILE_f2=fopen("f2.txt","w");
     pFILE_f3=fopen("f3.txt","w");
     pFILE_pareto_number=fopen("pareto_size.txt","w");
-    pFILE_pareto_discovery=fopen("pareto_discovery.txt","w");
     
     Procedural_Transformation T;
     SPEA_2 SPEA;
@@ -217,18 +198,21 @@ int main(){ /// DTLZ2
     three.push_back(0);
     three.push_back(0);
     three.push_back(-1);
+    /// Lower bound of feasible points.
     baddie.push_back(-2);
     baddie.push_back(-2);
     baddie.push_back(-2);
     
+    /// <LYLY PARAM>
     //Anchors.push_back(one);
     //Anchors.push_back(two);
     //Anchors.push_back(three);
     
     for(int stat_run=0; stat_run < STAT_RUNS; stat_run++) {
             T.Pareto_Reset();
-            T.Pareto_Check(baddie);
-            // /// We assume we can find our best solution for each objective.
+            T.Pareto_Check(baddie); /// For first iteration, so that P^*_I is not an empty set.
+            
+            /// <LYLY PARAM> We assume we can find our best solution for each objective.
             //T.Pareto_Check(one);
             //T.Pareto_Check(two);
             //T.Pareto_Check(three);
@@ -255,7 +239,7 @@ int main(){ /// DTLZ2
                     cout << "Run No." << stat_run << " is " << (double) gen / GENERATIONS * 100 << " % Complete!" << endl;
                 }
                 
-                /// For each population member in pA, execute 1 round of the DST domain:
+                /// For each population member in pA, execute 1 round of the DTLZ2 domain:
                 for (int mem=0; mem<POPULATION; mem++) {
                     Evo_Agent_DTLZ2* pA = &pVA->at(mem);
                     pA->reset();
@@ -283,21 +267,18 @@ int main(){ /// DTLZ2
                     /// <Procedural Transformation>
                     vector<double> MO;
                     vector<double>* pMO;
-                    vector<double> OMO;
+                    
                     pMO = &MO;
                     MO.push_back(pVA->at(a).get_fxn(0));
                     MO.push_back(pVA->at(a).get_fxn(1));
                     MO.push_back(pVA->at(a).get_fxn(2));
-                    OMO=MO; /// Copy for pareto check after transforming
                     //cout << "MO1 " << MO.at(0) << endl;
                     //cout << "MO2 " << MO.at(1) << endl;
                     
-                    
+                    to_pareto_check.push_back(MO);
                     T.execute_N_transform(pMO,a); /// TODO
-                    to_pareto_check.push_back(OMO);
                     
-                    
-                    
+
                     double TIME_WEIGHT=BETA;
                      pVA->at(a).transformed_fitness = MO.at(0) + MO.at(1) + MO.at(2);
                      pVA->at(a).fitness = pVA->at(a).transformed_fitness;
@@ -325,7 +306,7 @@ int main(){ /// DTLZ2
                    report(pFILE_pareto_number,T.get_pareto_size(),1);
                 }
                 
-                if(DO_NSGA){
+                if(DO_NSGA){ /// Overwrites fitness values before selection
                     NSGA_2 NSGA;
                     NSGA.declare_NSGA_dimension(3);
                     NSGA.NSGA_reset();
@@ -342,7 +323,7 @@ int main(){ /// DTLZ2
                     }
                 }
                 
-                if(DO_SPEA){
+                if(DO_SPEA){ /// Performs selection mechanism natively.
                     for(int a=0; a<pVA->size(); a++){
                     vector<double> MO;
                     MO.push_back(pVA->at(a).get_fxn(0));
@@ -368,6 +349,7 @@ int main(){ /// DTLZ2
                 /// determine mean, median for reporting
                 double generation_median = vector_median(fit);
                 double generation_mean = vector_mean(fit);
+                /// LY Note: [median_f1,median_f2,median_f3] does not correspond to a single point.
                 double median_f1 = vector_median(f1);
                 double median_f2 = vector_median(f2);
                 double median_f3 = vector_median(f3);
@@ -375,7 +357,7 @@ int main(){ /// DTLZ2
                 cout << "Generation\t" << gen << "\tf1:\t" << median_f1 << "\tf2:\t" << median_f2 << "\tf3:\t" << median_f3 << "\tfitness:\t" << generation_median << endl;
                 }
                 
-                if(!DO_SPEA){
+                if(!DO_SPEA){ /// Because SPEA2 does the selection enclosed in its own bloc.
                 /// always eliminate worst-performing solutions.
                 for(int e=0; e<ELIMINATE; e++){
                     double minfit = *min_element(fit.begin(), fit.end());
@@ -405,17 +387,11 @@ int main(){ /// DTLZ2
                 
                 if (pretty_print) {
                    report(pFILE_fit,generation_mean,1); /// report every result
-                   //report(pFILE_f1,median_f1,1); // Report every result
-                   //report(pFILE_f2,median_f2,1); // Report every result
-                   //report(pFILE_f3,median_f3,1); // Report every result
                    report(pFILE_pareto_number,T.get_pareto_size(),1);
                } else {                
                    //For Coarse Results
                    if (gen % (GENERATIONS / 100) == 0) {
                        report(pFILE_fit,generation_mean,1); // Report only occasionally
-                       //report(pFILE_f1,median_f1,1); // Report only occasionally
-                       //report(pFILE_f2,median_f2,1); // Report only occasionally
-                       //report(pFILE_f3,median_f3,1); // Report only occasionally
                        report(pFILE_pareto_number,T.get_pareto_size(),1);
                    }
                }

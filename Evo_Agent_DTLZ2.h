@@ -14,55 +14,53 @@
 #endif
 
 class Evo_Agent_DTLZ2 {
-    double raw_fitness; /// raw fitness calculated by treasure, time
     
-    vector <double> objective_evals; /// each individual objective
-    vector <double> transformed_objective_evals; /// each individual objective, post-transform
-
-    void console_1vector(vector<double>);
-    void console_2vector(vector<vector<double> >);
-
-    int rand_action();
-
-    double Initial_Q_Value;
-    
+    /// ACTIONS
+    void create_action_vector(int OBJS, int k);
     vector<double> actions;
     vector<double> xM;
     
-    void create_action_vector(int OBJS, int k);
+    /// EVALUATIONS
+    vector <double> objective_evals; /// each individual objective
+    vector <double> transformed_objective_evals; /// each individual objective, post-transform
+
+    /// VECTOR OUTPUTS
+    void console_1vector(vector<double>);
+    void console_2vector(vector<vector<double> >);
 
 public:
+    /// ACTIONS
     vector<double> get_xM();
     vector<double> get_actions();
-    
-    double transformed_fitness; /// transformed fitness after Pareto Transformation
-    double fitness; /// used for actual evolutionary method
     double get_action_element(int time);
     double get_xM_element(int elem);
-    double get_fitness();
-    void mutate();
+    void console_action_vector();
     double action;
-    void show_action_vector();
-    int id;
     
-    void start();       //Used before first run of a statistical run / repeat
-    void reset();       //Used at start of episode
-    
+    /// EVALUATIONS
+    double transformed_fitness; /// transformed fitness after Pareto Transformation
+    double fitness; /// used for actual evolutionary method
+    double get_fitness();
+    void set_fitness(double fit);
     void set_fxn(int dex, double val);
     double get_fxn(int dex);
     
-    void set_raw_fitness(double raw);
-    void set_fitness(double fit);
-
+    /// MUTATIONS
+    void mutate();
+    
+    /// FLOW
+    void start();       //Used before first run of a statistical run / repeat
+    void reset();       //Used at start of episode
+    int id;
 };
 
 void Evo_Agent_DTLZ2::start() {
     /// id is set outside of start, in main();
-    create_action_vector(3,3);
+    create_action_vector(3,10);
     fitness=-1;
 }
 
-void Evo_Agent_DTLZ2::reset() {
+void Evo_Agent_DTLZ2::reset() { /// Episode-based reset to clear objective vectors.
     objective_evals.clear();
     objective_evals.resize(OBJECTIVES);
     transformed_objective_evals.clear();
@@ -110,39 +108,34 @@ double Evo_Agent_DTLZ2::get_fxn(int dex){
     return objective_evals.at(dex);
 }
 
-void Evo_Agent_DTLZ2::set_raw_fitness(double raw){
-    raw_fitness=raw;
-}
-
 void Evo_Agent_DTLZ2::set_fitness(double fit){
     fitness=fit;
 }
 
 void Evo_Agent_DTLZ2::console_2vector(vector< vector<double> > a) {
+    /// Output 2 dimensional vector to console.
     for (int i = 0; i < a.size(); i++) {
         console_1vector(a.at(i));
-        cout << endl;
     }
+    cout << endl;
 }
 
+
 void Evo_Agent_DTLZ2::console_1vector(vector<double> a) {
+    /// Output 1 dimensional vector to console.
     for (int i = 0; i < a.size(); i++) {
         cout << a.at(i);
         cout << "\t";
     }
+    cout << endl;
 }
 
-int Evo_Agent_DTLZ2::rand_action() {
-    int a;
-    a = rand() % ACTIONS;
-    return a;
-}
-
-void Evo_Agent_DTLZ2::show_action_vector() {
+void Evo_Agent_DTLZ2::console_action_vector() {
     int A=actions.size();
     for(int a=0; a<A; a++){
         cout << actions.at(a) << "\t";
     }
+    cout << " || ";
     for(int a=0; a<xM.size(); a++){
         cout << xM.at(a) << "\t";
     }
@@ -150,6 +143,7 @@ void Evo_Agent_DTLZ2::show_action_vector() {
 }
 
 void Evo_Agent_DTLZ2::mutate() {
+    /// Mutation operator for EA/SA algorithm
     /// <PARAM>
     for(int i=0; i<actions.size(); i++){
         actions.at(i)+=LYrand_norm(0.1);

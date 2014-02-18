@@ -198,8 +198,6 @@ void SPEA_2::SPEA_reset() {
 }
 
 void SPEA_2::vector_input(vector<double> put_in, int dex) {
-    //cout << "vector_input is not yet developed. This run is void." << endl;
-    //vector<double> all_inputs;
     SPEA_2_mem mem;
     mem.startup();
     mem.coordinates=put_in;
